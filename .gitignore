@@ -1,0 +1,29 @@
+# SBT
+target/
+project/target/
+project/project/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.bsp/
+.metals/
+.bloop/
+metals.sbt
+
+# Scala
+*.class
+*.log
+
+# Persistence (in-memory storage, not used with PostgreSQL)
+journal/
+snapshots/
+
+# Database
+*.db
+*.sqlite
+
+# OS
+.DS_Store
+Thumbs.db
