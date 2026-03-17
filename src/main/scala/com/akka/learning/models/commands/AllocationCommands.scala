@@ -15,6 +15,21 @@ import com.akka.learning.models.domain.{AllocationRequest, AllocationResult}
  * Base trait for Allocation Actor commands
  */
 sealed trait AllocationCommand extends CborSerializable
+
+/**
+ * Internal commands (used by actor implementation only, not exposed to external API)
+ */
+private[learning] case class WrappedAllocationComplete(
+  allocationId: String,
+  result: AllocationResult,
+  replyTo: ActorRef[AllocationResponse]
+) extends AllocationCommand
+
+private[learning] case class WrappedAllocationFailed(
+  allocationId: String,
+  reason: String,
+  replyTo: ActorRef[AllocationResponse]
+) extends AllocationCommand
  
 /**
  * Start an allocation run

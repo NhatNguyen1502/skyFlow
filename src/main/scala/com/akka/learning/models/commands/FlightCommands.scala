@@ -65,7 +65,7 @@ case class ReleaseSeats(
 sealed trait FlightResponse extends CborSerializable
 
 case class FlightInfo(flight: Flight) extends FlightResponse
-case class FlightCreated(flightId: String) extends FlightResponse
+case class FlightCreatedResponse(flightId: String) extends FlightResponse
 case class SeatsUpdated(flightId: String, availableSeats: Int) extends FlightResponse
 case class StatusUpdated(flightId: String, status: FlightStatus) extends FlightResponse
 case class FlightNotFound(flightId: String) extends FlightResponse
