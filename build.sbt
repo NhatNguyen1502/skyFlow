@@ -25,9 +25,13 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-persistence-testkit" % akkaVersion % Test,
   "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
   
-  // PostgreSQL Persistence plugin
-  "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.0.4",
-  "org.postgresql" % "postgresql" % "42.6.0",
+  // Override Jackson module-scala to match databind 2.15.x (evicted by logstash)
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.15.2",
+  
+  // Persistence plugins
+  "com.typesafe.akka" %% "akka-persistence-typed" % akkaVersion,
+  "com.lightbend.akka" %% "akka-persistence-jdbc" % "5.0.4",  // Optional JDBC
+  "org.postgresql" % "postgresql" % "42.6.0",                 // PostgreSQL driver
   
   // HikariCP for connection pooling
   "com.zaxxer" % "HikariCP" % "5.0.1",
