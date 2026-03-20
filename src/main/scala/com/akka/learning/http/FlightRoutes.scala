@@ -17,19 +17,10 @@ import scala.concurrent.duration._
 
 /**
  * Flight REST API Routes
- * 
- * Provides CRUD operations for flights:
- * - POST   /flights              - Create a new flight
- * - GET    /flights/{flightId}   - Get flight by ID
- * - GET    /flights              - List all flights
- * - PUT    /flights/{flightId}/seats - Update available seats
- * - PUT    /flights/{flightId}/status - Update flight status
- * - DELETE /flights/{flightId}   - Cancel a flight
  */
 class FlightRoutes(registry: ActorRef[RegistryCommand])(implicit system: ActorSystem[_]) extends JsonProtocols {
 
   private implicit val timeout: Timeout = 3.seconds
-  import system.executionContext
 
   val routes: Route = pathPrefix("flights") {
     concat(
@@ -105,64 +96,12 @@ class FlightRoutes(registry: ActorRef[RegistryCommand])(implicit system: ActorSy
                 registry.ask(replyTo => GetFlight(flightId, replyTo))
 
               onSuccess(futureResponse) {
-                case FlightRetrieved(Some(flight)) =>
+                case FlightDetails(flight) =>
                   complete(StatusCodes.OK, flight)
-                case FlightRetrieved(None) =>
+                case RegistryFlightNotFound(_) =>
                   complete(StatusCodes.NotFound, ErrorResponse("FlightNotFound", s"Flight $flightId not found"))
                 case _ =>
                   complete(StatusCodes.InternalServerError, ErrorResponse("GetFlightFailed", "Failed to retrieve flight"))
-              }
-            }
-          },
-          // PUT /flights/{flightId}/seats - Update seats
-          path("seats") {
-            put {
-              entity(as[UpdateSeatsRequest]) { request =>
-                val futureResponse: Future[RegistryResponse] =
-                  registry.ask(replyTo => UpdateFlightSeats(flightId, request.seats, replyTo))
-
-                onSuccess(futureResponse) {
-                  case response: RegistryFlightSeatsUpdated =>
-                    complete(StatusCodes.OK, response.flight)
-                  case RegistryOperationFailed(_, reason) =>
-                    complete(StatusCodes.BadRequest, ErrorResponse("UpdateSeatsFailed", reason))
-                  case _ =>
-                    complete(StatusCodes.InternalServerError, ErrorResponse("UnexpectedResponse", "Unexpected response from registry"))
-                }
-              }
-            }
-          },
-          // PUT /flights/{flightId}/status - Update status
-          path("status") {
-            put {
-              entity(as[UpdateStatusRequest]) { request =>
-                val futureResponse: Future[RegistryResponse] =
-                  registry.ask(replyTo => UpdateFlightStatus(flightId, request.status, replyTo))
-
-                onSuccess(futureResponse) {
-                  case response: RegistryFlightStatusUpdated =>
-                    complete(StatusCodes.OK, response.flight)
-                  case RegistryOperationFailed(_, reason) =>
-                    complete(StatusCodes.BadRequest, ErrorResponse("UpdateStatusFailed", reason))
-                  case _ =>
-                    complete(StatusCodes.InternalServerError, ErrorResponse("UnexpectedResponse", "Unexpected response from registry"))
-                }
-              }
-            }
-          },
-          // DELETE /flights/{flightId} - Cancel flight
-          pathEnd {
-            delete {
-              val futureResponse: Future[RegistryResponse] =
-                registry.ask(replyTo => UpdateFlightStatus(flightId, FlightStatus.Cancelled, replyTo))
-
-              onSuccess(futureResponse) {
-                case response: RegistryFlightStatusUpdated =>
-                  complete(StatusCodes.OK, SuccessResponse(s"Flight $flightId cancelled"))
-                case RegistryOperationFailed(_, reason) =>
-                  complete(StatusCodes.BadRequest, ErrorResponse("CancelFlightFailed", reason))
-                case _ =>
-                  complete(StatusCodes.InternalServerError, ErrorResponse("UnexpectedResponse", "Unexpected response from registry"))
               }
             }
           }

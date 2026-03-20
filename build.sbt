@@ -20,7 +20,7 @@ libraryDependencies ++= Seq(
   // Akka Streams
   "com.typesafe.akka" %% "akka-stream" % akkaVersion,
   
-  // Akka Persistence (Phase 5 - Event Sourcing)
+  // Akka Persistence
   "com.typesafe.akka" %% "akka-persistence-typed" % akkaVersion,
   "com.typesafe.akka" %% "akka-persistence-testkit" % akkaVersion % Test,
   "com.typesafe.akka" %% "akka-serialization-jackson" % akkaVersion,
