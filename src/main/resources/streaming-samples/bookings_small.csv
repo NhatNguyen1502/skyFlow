@@ -1,0 +1,11 @@
+passengerId,passengerName,email,origin,destination,seatsRequested
+P001,Nguyen Van A,nva@example.com,HAN,SGN,2
+P002,Tran Thi B,ttb@example.com,HAN,DAD,1
+P003,Le Van C,lvc@example.com,SGN,DAD,3
+P004,Pham Thi D,ptd@example.com,HAN,SGN,1
+P005,Hoang Van E,hve@example.com,SGN,PQC,2
+P006,Vu Thi F,vtf@example.com,HAN,CXR,4
+P007,Dao Van G,dvg@example.com,DAD,PQC,1
+P008,Bui Thi H,bth@example.com,HAN,SGN,3
+P009,Ngo Van I,nvi@example.com,SGN,DAD,2
+P010,Ly Thi K,ltk@example.com,HAN,DAD,1
