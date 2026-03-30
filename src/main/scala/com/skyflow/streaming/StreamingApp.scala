@@ -140,7 +140,7 @@ object StreamingApp {
     val output = outputDir.resolve("feature4_success.csv")
     val errors = outputDir.resolve("feature4_errors.csv")
 
-    ErrorHandlingService.processWithEitherPattern(input, output, errors).map { report =>
+    ErrorHandlingService.processWithDLQ(input, output, errors).map { report =>
       println(s"Success: ${report.successCount}")
       println(s"Errors:  ${report.errorCount}")
       println(s"Output:  $output")
@@ -152,7 +152,7 @@ object StreamingApp {
     println("=== Feature 5: Backpressure & Throttling ===")
     val input = baseDir.resolve("bookings_small.csv")
 
-    BackpressureService.processWithThrottle(input, elementsPerSecond = 5).map { report =>
+    BackpressureService.processWithThrottle(input, elementsPerSecond = 100).map { report =>
       println(s"Processed: ${report.totalProcessed} records")
       println(f"Duration:  ${report.durationMs}ms")
       println(f"Rate:      ${report.effectiveRate}%.1f records/sec")
