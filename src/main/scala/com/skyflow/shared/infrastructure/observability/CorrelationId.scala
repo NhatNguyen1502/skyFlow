@@ -5,9 +5,8 @@ import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Success, Failure}
 import java.util.UUID
 
-/**
- * Correlation ID management for request tracing across async boundaries.
- */
+/** Correlation ID management for request tracing across async boundaries.
+  */
 object CorrelationId {
 
   val CORRELATION_ID_KEY = "correlationId"
@@ -21,7 +20,8 @@ object CorrelationId {
   def getODGroup(): Option[String] = Option(MDC.get(OD_GROUP_KEY))
 
   def getContext(): CorrelationContext = {
-    val correlationId = Option(MDC.get(CORRELATION_ID_KEY)).getOrElse(generate())
+    val correlationId =
+      Option(MDC.get(CORRELATION_ID_KEY)).getOrElse(generate())
     val runId = Option(MDC.get(RUN_ID_KEY))
     val odGroup = Option(MDC.get(OD_GROUP_KEY))
     CorrelationContext(correlationId, runId, odGroup)
@@ -53,8 +53,9 @@ object CorrelationId {
     }
   }
 
-  def withContextAsync[T](context: CorrelationContext)(future: => Future[T])
-                         (implicit ec: ExecutionContext): Future[T] = {
+  def withContextAsync[T](
+      context: CorrelationContext
+  )(future: => Future[T])(implicit ec: ExecutionContext): Future[T] = {
     val ctx = context
     future.andThen {
       case Success(_) => setContext(ctx)

@@ -4,12 +4,21 @@ import org.slf4j.Logger
 import java.time.LocalDateTime
 import scala.concurrent.{ExecutionContext, Future}
 
-/**
- * Performance metrics and benchmarking utilities.
- */
+/** Performance metrics and benchmarking utilities. */
 object Metrics {
 
-  def time[T](operation: String)(block: => T)(implicit logger: Logger): (T, Long) = {
+  /** Time a synchronous block of code and log the duration.
+    *
+    * Example usage:
+    * {{{
+    * val (result, duration) = Metrics.time("myOperation") {
+    *   synchronousFunction()
+    * }
+    * }}}
+    */
+  def time[T](
+      operation: String
+  )(block: => T)(implicit logger: Logger): (T, Long) = {
     val start = System.currentTimeMillis()
     val result = block
     val duration = System.currentTimeMillis() - start
@@ -17,8 +26,18 @@ object Metrics {
     (result, duration)
   }
 
-  def timeAsync[T](operation: String)(future: => Future[T])
-                  (implicit ec: ExecutionContext, logger: Logger): Future[(T, Long)] = {
+  /** Time an asynchronous block of code and log the duration when it completes.
+    *
+    * Example usage:
+    * {{{
+    * val futureResult = Metrics.timeAsync("myAsyncOperation") {
+    *   asynchronousFunction()
+    * }
+    * }}}
+    */
+  def timeAsync[T](operation: String)(
+      future: => Future[T]
+  )(implicit ec: ExecutionContext, logger: Logger): Future[(T, Long)] = {
     val start = System.currentTimeMillis()
     future.map { result =>
       val duration = System.currentTimeMillis() - start
@@ -27,24 +46,61 @@ object Metrics {
     }
   }
 
-  def measure[T](operation: String, correlationId: Option[String] = None,
-                 metadata: Map[String, String] = Map.empty)
-                (block: => T): (T, PerformanceMetrics) = {
+  /** Measure the duration of a block of code and return both the result and
+    * performance metrics.
+    *
+    * Example usage:
+    * {{{
+    * val (result, metrics) = Metrics.measure("myOperation") {
+    *   synchronousFunction()
+    * }
+    * }}}
+    */
+  def measure[T](
+      operation: String,
+      correlationId: Option[String] = None,
+      metadata: Map[String, String] = Map.empty
+  )(block: => T): (T, PerformanceMetrics) = {
     val start = System.currentTimeMillis()
     val result = block
     val duration = System.currentTimeMillis() - start
-    val metrics = PerformanceMetrics(operation, duration, LocalDateTime.now(), correlationId, metadata)
+    val metrics = PerformanceMetrics(
+      operation,
+      duration,
+      LocalDateTime.now(),
+      correlationId,
+      metadata
+    )
     (result, metrics)
   }
 
-  def measureAsync[T](operation: String, correlationId: Option[String] = None,
-                      metadata: Map[String, String] = Map.empty)
-                     (future: => Future[T])
-                     (implicit ec: ExecutionContext): Future[(T, PerformanceMetrics)] = {
+  /** Measure the duration of an asynchronous block of code and return both the
+    * result and performance metrics when it completes.
+    *
+    * Example usage:
+    * {{{
+    * val futureResult = Metrics.measureAsync("myAsyncOperation") {
+    *   asynchronousFunction()
+    * }
+    * }}}
+    */
+  def measureAsync[T](
+      operation: String,
+      correlationId: Option[String] = None,
+      metadata: Map[String, String] = Map.empty
+  )(
+      future: => Future[T]
+  )(implicit ec: ExecutionContext): Future[(T, PerformanceMetrics)] = {
     val start = System.currentTimeMillis()
     future.map { result =>
       val duration = System.currentTimeMillis() - start
-      val metrics = PerformanceMetrics(operation, duration, LocalDateTime.now(), correlationId, metadata)
+      val metrics = PerformanceMetrics(
+        operation,
+        duration,
+        LocalDateTime.now(),
+        correlationId,
+        metadata
+      )
       (result, metrics)
     }
   }
@@ -68,9 +124,14 @@ object Metrics {
 
     def complete(): Long = {
       val totalTime = System.currentTimeMillis() - startTime
-      logger.info(s"[$operation] Completed in ${totalTime}ms with ${checkpoints.size} checkpoints")
-      checkpoints.foreach { case (label, time) => logger.debug(s"  - $label: ${time}ms") }
-      if (_metadata.nonEmpty) logger.debug(s"  Metadata: ${_metadata.mkString(", ")}")
+      logger.info(
+        s"[$operation] Completed in ${totalTime}ms with ${checkpoints.size} checkpoints"
+      )
+      checkpoints.foreach { case (label, time) =>
+        logger.debug(s"  - $label: ${time}ms")
+      }
+      if (_metadata.nonEmpty)
+        logger.debug(s"  Metadata: ${_metadata.mkString(", ")}")
       totalTime
     }
 
@@ -78,10 +139,17 @@ object Metrics {
     def elapsed: Long = System.currentTimeMillis() - startTime
 
     def toMetrics(correlationId: Option[String] = None): PerformanceMetrics = {
-      val checkpointMetadata = checkpoints.zipWithIndex.map { case ((label, time), idx) =>
-        s"checkpoint_${idx}_$label" -> s"${time}ms"
+      val checkpointMetadata = checkpoints.zipWithIndex.map {
+        case ((label, time), idx) =>
+          s"checkpoint_${idx}_$label" -> s"${time}ms"
       }.toMap
-      PerformanceMetrics(operation, elapsed, LocalDateTime.now(), correlationId, _metadata ++ checkpointMetadata)
+      PerformanceMetrics(
+        operation,
+        elapsed,
+        LocalDateTime.now(),
+        correlationId,
+        _metadata ++ checkpointMetadata
+      )
     }
   }
 
@@ -105,8 +173,12 @@ object Metrics {
     def getCount: Long = count
 
     def summary(implicit logger: Logger): Unit =
-      logger.info(s"[$operation] count=$count avg=${f"$average%.1f"}ms min=${min}ms max=${max}ms total=${total}ms")
+      logger.info(
+        s"[$operation] count=$count avg=${f"$average%.1f"}ms min=${min}ms max=${max}ms total=${total}ms"
+      )
   }
 
-  def aggregator(operation: String): MetricsAggregator = new MetricsAggregator(operation)
+  def aggregator(operation: String): MetricsAggregator = new MetricsAggregator(
+    operation
+  )
 }

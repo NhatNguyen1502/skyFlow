@@ -20,16 +20,20 @@ object Main {
   case object Shutdown extends Command
 
   def main(args: Array[String]): Unit = {
-    logger.info("Starting SkyFlow - Flight Allocation System (DDD Architecture)")
+    logger.info(
+      "Starting SkyFlow - Flight Allocation System (DDD Architecture)"
+    )
 
     val rootBehavior = Behaviors.setup[Command] { context =>
       // ── Flight Bounded Context ──
-      val flightRegistry = context.spawn(FlightRegistryActor(), "flightRegistry")
+      val flightRegistry =
+        context.spawn(FlightRegistryActor(), "flightRegistry")
       logger.info("FlightRegistry spawned at {}", flightRegistry.path)
 
       // ── HTTP Server Setup ──
       implicit val system: ActorSystem[_] = context.system
-      implicit val executionContext: ExecutionContextExecutor = system.executionContext
+      implicit val executionContext: ExecutionContextExecutor =
+        system.executionContext
 
       val flightRoutes = new FlightRoutes(flightRegistry)
 
@@ -45,10 +49,26 @@ object Main {
       serverBinding.onComplete {
         case Success(binding) =>
           val address = binding.localAddress
-          logger.info("HTTP Server online at http://{}:{}/", address.getHostString, address.getPort)
-          logger.info("POST   http://{}:{}/api/flights                  - Create new flight", address.getHostString, address.getPort)
-          logger.info("GET    http://{}:{}/api/flights                  - List all flights", address.getHostString, address.getPort)
-          logger.info("GET    http://{}:{}/api/flights/{{flightId}}     - Get specific flight", address.getHostString, address.getPort)
+          logger.info(
+            "HTTP Server online at http://{}:{}/",
+            address.getHostString,
+            address.getPort
+          )
+          logger.info(
+            "POST   http://{}:{}/api/flights                  - Create new flight",
+            address.getHostString,
+            address.getPort
+          )
+          logger.info(
+            "GET    http://{}:{}/api/flights                  - List all flights",
+            address.getHostString,
+            address.getPort
+          )
+          logger.info(
+            "GET    http://{}:{}/api/flights/{{flightId}}     - Get specific flight",
+            address.getHostString,
+            address.getPort
+          )
           logger.info("Press CTRL+C to stop the server.")
 
         case Failure(exception) =>
